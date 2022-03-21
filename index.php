@@ -1,7 +1,7 @@
 <?php 
 class QueryBuilder
 {
-    public $dsn = "mysql:host=localhost;dbname=coding-academy";
+    public $dsn = "mysql:host=localhost;dbname=eccomers";
     public $username = "root";
     public $pass = "";
     private $pdo;ج
@@ -18,44 +18,76 @@ class QueryBuilder
 
     public function select($columns = "*")
     {
-    }
-
-    public function update($table)
-    {
+        $this->finalQuery ="select $columns from $tablel  ";
         return $this;
     }
 
-    public function delete()
+    public function update($table,$columns)
     {
+
+    $params = [];
+
+    foreach ($table_data as $key => $value) {
+      $params[] = "`$key` = '$value'";
+    }
+
+    $this->finalQuery  = "UPDATE `{$this->table}` SET " . implode(',', $params);
+
+    return $this;
+    }
+
+    public function delete($table)
+    {
+        $this->finalQuery  ="DELETE FROM `{$this->table}` ";
         return $this;
     }
 
-    public function insert()
+    public function insert($table_data,$table)
     {
+        $columns = '';
+    $values = '';
+
+    foreach ($table_data as $key => $value) {
+      $columns .= "`$key` ,";
+      $values .= "'$value' ,";
+    }
+
+    // $columns = substr($columns, 0, -1);
+    // $values = substr($values, 0, -1);
+
+    $this->finalQuery  = "INSERT INTO `{$this->$table}` ($columns) VALUES ({$values})";
+
          return $this;
     }
 
-    public function orderBy()
+    public function orderBy(string $column, string $order_type = "ASC")
     {
-        $this->finalQuery ="select $columns from $tablel  left join $able2 on $condition";
+        $this->finalQuery =" ORDER BY '$column' $order_type ";
+        return $this;
+    }
+    public function groupBy(string $column)
+  {
+    $this->finalQuery = " GROUP BY '$column'  ";
+
+    return $this;
+  }
+
+    public function count(string $column)
+    {
+       
+        $this->finalQuery = " SELECT COUNT('$column') FROM `$this->table` ";
         return $this;
     }
 
-    public function count()
+    public function limit(int $number)
     {
-        $this->finalQuery ="select $columns from $tablel  left join $able2 on $condition";
-        return $this;
-    }
-
-    public function limit()
-    {
-        $this->finalQuery ="select $columns from $tablel  left join $able2 on $condition";
+        $this->finalQuery =" LIMIT $number ";
         return $this;
     }
 
     public function innerJoin($columns,$table,$table2,$condition)
     {
-        $this->finalQuery ="select $columns from $tablel  left join $able2 on $condition";
+        $this->finalQuery ="select $columns from $tablel  inner join $able2 on $condition";
         return $this;
     }
 
@@ -67,9 +99,15 @@ class QueryBuilder
 
     public function rightJoin()
     {
-        $this->finalQuery ="select $columns from $tablel  left join $able2 on $condition";
+        $this->finalQuery ="select $columns from $tablel  right join $able2 on $condition";
         return $this;
     }
+    public function where(string $key, string $value)
+  {
+    $this->finalQuery = " WHERE `$key` = '$value'";
+
+    return $this;;
+  }
 
     public function runQuery()
     {
